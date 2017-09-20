@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html style="Height: 100%; margin: 0;">
+<head>
+<title>Concordia Worldmap by Jane Hendriks</title>
+ <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+ <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+</head>
+<body style="height: 100%; margin: 0;">
+<div id="map" style="width: 100%; height: 100%; background: #000000; margin: 0; "></div>
+#mapid { height: 7303px; }
+<script type="text/javascript">
+
+
+// Reference Map Tiles
+var world = L.tileLayer('Maps/Concordia/{z}/{x}/{y}.png', {
+minZoom: 2,
+maxZoom: 6,
+continuousWorld: false,
+noWrap: true,
+tms: false,
+});
+
+var grid = L.tileLayer('Maps/ConcordiaGrid/{z}/{x}/{y}.png', {
+minZoom: 2,
+maxZoom: 6,
+continuousWorld: false,
+noWrap: true,
+tms: false,
+});
+
+var kingdoms = L.tileLayer('Maps/ConcordiaKingdoms/{z}/{x}/{y}.png', {
+minZoom: 2,
+maxZoom: 6,
+continuousWorld: false,
+noWrap: true,
+tms: false,
+});
+
+
+//Custom Icon
+var bTriangleIcon = L.icon({
+    iconUrl: 'Leaflet/images/BlackTriangle.png',
+    shadowUrl: 'Leaflet/images/marker-shadow.png',
+
+    iconSize:     [18, 25], // size of the icon
+    shadowSize:   [0, 0], // size of the shadow
+    iconAnchor:   [8, 25], // point of the icon which will correspond to marker's location
+    shadowAnchor: [10, 90],  // the same for the shadow
+    popupAnchor:  [1, -27] // point from which the popup should open relative to the iconAnchor
+});
+
+var bStarIcon = L.icon({
+    iconUrl: 'Leaflet/images/BlackStar.png',
+    shadowUrl: 'Leaflet/images/marker-shadow.png',
+
+    iconSize:     [25, 32], // size of the icon
+    shadowSize:   [0, 0], // size of the shadow
+    iconAnchor:   [12, 30], // point of the icon which will correspond to marker's location
+    shadowAnchor: [10, 90],  // the same for the shadow
+    popupAnchor:  [1, -32] // point from which the popup should open relative to the iconAnchor
+});
+
+var yStarIcon = L.icon({
+    iconUrl: 'Leaflet/images/YellowStar.png',
+    shadowUrl: 'Leaflet/images/marker-shadow.png',
+
+    iconSize:     [25, 32], // size of the icon
+    shadowSize:   [0, 0], // size of the shadow
+    iconAnchor:   [12, 30], // point of the icon which will correspond to marker's location
+    shadowAnchor: [10, 90],  // the same for the shadow
+    popupAnchor:  [1, -32], // point from which the popup should open relative to the iconAnchor
+});
+
+var rStarIcon = L.icon({
+    iconUrl: 'Leaflet/images/RedStar.png',
+    shadowUrl: 'Leaflet/images/marker-shadow.png',
+
+    iconSize:     [25, 32], // size of the icon
+    shadowSize:   [0, 0], // size of the shadow
+    iconAnchor:   [12, 30], // point of the icon which will correspond to marker's location
+    shadowAnchor: [10, 90],  // the same for the shadow
+    popupAnchor:  [1, -32], // point from which the popup should open relative to the iconAnchor
+});
+
+var bCircleIcon = L.icon({
+    iconUrl: 'Leaflet/images/BlackCircle.png',
+    shadowUrl: 'Leaflet/images/marker-shadow.png',
+
+    iconSize:     [18, 25], // size of the icon
+    shadowSize:   [0, 0], // size of the shadow
+    iconAnchor:   [8, 25], // point of the icon which will correspond to marker's location
+    shadowAnchor: [10, 90],  // the same for the shadow
+    popupAnchor:  [1, -27] // point from which the popup should open relative to the iconAnchor
+});
+
+var rFlagIcon = L.icon({
+    iconUrl: 'Leaflet/images/RedFlag.png',
+    shadowUrl: 'Leaflet/images/marker-shadow.png',
+
+    iconSize:     [18, 25], // size of the icon
+    shadowSize:   [0, 0], // size of the shadow
+    iconAnchor:   [2, 25], // point of the icon which will correspond to marker's location
+    shadowAnchor: [10, 90],  // the same for the shadow
+    popupAnchor:  [2, -25] // point from which the popup should open relative to the iconAnchor
+});
+
+var WaystoneIcon = L.icon({
+    iconUrl: 'Leaflet/images/Waystone.png',
+    shadowUrl: 'Leaflet/images/marker-shadow.png',
+
+    iconSize:     [18, 25], // size of the icon
+    shadowSize:   [0, 0], // size of the shadow
+    iconAnchor:   [2, 25], // point of the icon which will correspond to marker's location
+    shadowAnchor: [10, 90],  // the same for the shadow
+    popupAnchor:  [2, -25] // point from which the popup should open relative to the iconAnchor
+});
+
+
+//Capital Custom Popups
+    var customPopup1 = "<img src='Maps/Capitals/GoldenHalls.jpg' height='300px', width='300px'/><br><b>The Golden Halls of Trondinar, Capital of Trondinar</b><br><i>Race: Dwarves<br>Founded: Before the Reckoning; Retaken 86AR</i><br><br> Nestled deep within the Spineshatter Mountains lay the Golden Halls of the dwarves. Named after it's wealth and splendor, this fortress spans across many halls, caverns and living areas carved out of the mountain itself. Famed for being a stronghold able to withstand any assault, it's only weakness lies in the vast tunnel network, which some say led the dwarves to discover the drow city of Naggeroth.<br><br>In 2AR the kingdom was overrun by creatures from the Underdark via the Golgoroth Labyrinth, not to be retaken by the dwarves until 86AR.";
+
+var customPopup2 = "<img src='Maps/Capitals/Venosia.jpg' height='250px', width='300px'/><br><b>Venosia</b><br><i>Race: Wild Elves<br>Founded: 64AR</i><br><br>In the northern reaches of Lunasyll the wild elves came to inhabit the Venosian Forest in 64AR after the clans came to a disagreement on how to venture forth with their laws and relations between the other kingdoms. Though not officially a kingdom, Venosia is their largest settlement, home to most of the Venosian wild elves.<br><br>In 86AR the dwarves from Erdunar sought to reclaim their kingdom from the creatures of the Underdark that had come to claim the Golden Halls of Trondinar, but the Venosian elves did not allow them passage, erupting in a small war between dwarves and elves, gaining them the title wild elves. In the end the dwarves were victorious and cut a pass through the forest, and the wild elves of the Venosian Forest never forgot and never forgave. They have a strong disdain for dwarves, but are hostile to almost all passerby's, especially so when their kin in Lunasyll did not come to their aid, leaving them feeling betrayed.";
+
+    var customPopup3 = "<img src='Maps/Capitals/Virconium.jpg' height='200px', width='300px'/><br><b>Virconium, Capital of Brolgar</b><br><i>Race: Gnomes<br>Founded: 35AR</i><br><br> The city of Virconium is a unique sight to behold, various odd-shaped buildings and monuments can be found within, as it is known Virconium is home to the most renowned inventors and alchemists upon Ascentia.";
+
+    var customPopup4 = "<img src='Maps/Capitals/Erdunar.jpg' height='300px', width='300px'/><br><b>The Royal Canton of Erdunar, Capital of Erdunar</b><br><i>Race: Dwarves<br>Founded: 2AR</i><br><br> When his father Kor doomed the kingdom of Trondinar in 2AR, Erdun led his people to safety, to the new kingdom of Erdunar. The finest craftsmen went to work beneath Mount Kinroyal, digging, crafting and reinforcing new halls beneath. The underground halls span across a large portion of the kingdom, with various cantons holding their own population and clans, but the main entrance lies here, leading to the Royal Canton of Erdunar, home to the royal family.";
+
+    var customPopup5 = "<img src='Maps/Capitals/Emalon.jpg' height='250px', width='300px'/><br><b>Emalon, Capital of Entarin</b><br><i>Race: Humans<br>Founded: Before the Reckoning; Independant since 92AR</i><br><br> The great white city of Entarin, erected to be the most beautiful of all cities. Crafted from white stone, seemingly floating majestically upon Lake Lornar's waters, the city became the new nation's capital when Crysta's lands got divided and what was previously East-Crysta became Entarin, under the rule of it's own king. Home to the most noble and wealthiest of the kingdom, it is known to tax not only it's citizens, but also it's visitors to marvel at the city's splendor.";
+
+    var customPopup6 = "<img src='Maps/Capitals/Arlathan.jpg' height='300px', width='300px'/><br><b>Arlathan, Capital of Lunasyll</b><br><i>Race: Elves<br>Founded: Before the Reckoning</i><br><br> In the heart of Lunasyll's High Forest lies a great mountain and upon it's peak the elven city of Arlathan was built. Above the clouds the city has a serene and solitairy location and on a clear day one can see far across the eastern kingdoms. Arlathan can be accessed in two ways, through a path leading from the east up the mountain to it's peak or through a single magnificent hollowed tree, up a winding stairs known as the trial of 30.000 steps.";
+
+    var customPopup7 = "<img src='Maps/Capitals/Highwind.jpg' height='300px', width='300px'/><br><b>Highwind, Capital of Crysta</b><br><i>Race: Humans<br>Founded: Before the Reckoning</i><br><br> The great capital of the proud human kingdom of Crysta was built at the mountain's slope, over the years expanding further along the mountainside. At the city's highest point, the pinnacle of the city; the palace was built, home to the royal family of Crysta. The palace can be seen from every corner of the large city of Highwind, overseeing the city from above.<br><br>In 1200, on the night of the new year's celebration the city was overtaken by Drows, who disabled the sundials in the capital and took the city by surprise in one fell swoop. From thereon they created a perpetual magical darkness that spread from Highwind across the kingdom of Crysta, as the whole kingdom slowely but surely fell to the drows, now able to operate day and night under the cover of darkness.";
+
+    var customPopup8 = "<img src='Maps/Capitals/Lighthaven.jpg' height='300px', width='300px'/><br><b>Lighthaven, Capital of Draemor</b><br><i>Race: Humans<br>Founded: 712AR</i><br><br> The story of Lighthaven and Draemor is one of great darkness. The land got corrupted by darkness in 92AR, becoming dry and lifeless gradually. Crysta became divided and these lands came to be known as Draemor. Lighthaven was once a sanctuary for those with magical abilities, shunned in other towns and villages. When the corruption spread, a man named Mason Velenor, possessed by a demon named Lezziad created an army and attacked Crysta in 106AR in the first War of the Forsaken. After 7 years Draemor and the town of Lighthaven got barred off from the world through a magical dome permitting neither living, nor dead, nor even time itself passage. The barrier broke in 225AR, in which Lezziad led a second War of the Forsaken, but the same fate befell them a year thereafter.<br>It wasn't until 712AR when Lezziad planned his escape that a group of adventurers named Dane Mountainmane, Mas Murs'sstrea, Lucinda Attina and Catelyn Valen freed the guardian of the forest; Erisdar, from it's corruption, leading to the cleansing of Lighthaven and it's lands.";
+
+    var customPopup9 = "<img src='Maps/Capitals/Essos.jpg' height='300px', width='300px'/><br><b>Essos, Capital of Kanto</b><br><i>Race: Halflings<br>Founded: 113AR</i><br><br> Once these lands were part of Crysta, the fertile lands in the north of the Karthax Plains before Draemor became corrupted. After the first War of the Forsaken in 113AR, due it's remote location from Crysta's more populated lands, the gnomes pleaded to have these farmlands as their own. Crysta obliged and henceforth the lands came to be known as Kanto.<br>Essos, accessed through a valley is the capital of Kanto, home to it's King and it's citizens, who no longer tend farmlands, but rather shops, crafts and services.";
+
+    var customPopup10 = "<img src='Maps/Capitals/Myrthana.jpg' height='300px', width='300px'/><br><b>Myrthana, Capital of North-Mareen</b><br><i>Race: Merfolk (land-dwelling)<br>Founded: Before the Reckoning</i><br><br> Myrthana, the watercity crowned capital of North-Mareen, built elevated in the middle of a lake and uniquely accessable by water. Aquaducts with magical thrusting powers were built that allow ships to enter and exit Myrthana, laying anchor right at the heart of the city. Though the merfolk simply travel through the waters of Myrthana between it's buildings and districts, it's visitors are given the option to rent rowboats or simply travel through Myrthana's underwater glass tunnels leading to all buildings from below. <br><br>Known as one of the greatest trade cities with a magnificent hall dedicated to trade, Myrthana is a sight to behold.<br>It's greatest and unrelenting threats come from the east, the creatures from the Zenuvean Marshes and perhaps even more so from the south; from their own kin who judge them for their choice to dwell on land, rather as in the sea.";
+
+    var customPopup11 = "<img src='Maps/Capitals/Zesqua.jpg' height='300px', width='300px'/><br><b>Zesqua, Capital of South-Mareen</b><br><i>Race: Merfolk<br>Founded: 11AR</i><br><br> After Helix left his merfolk to live without his direct guidance, the merfolk could not shape as often anymore, which left with a choice of lifestyle; to live under the oceans waves or above. The merfolk that choose to live within the ocean left the riverlands of North-Mareen in 11AR and settled into underwater settlements and cities both majestic and impressive to behold. Zesqua became the merfolk of South-Mareen their capital, home to the King and his denizens. <br><br>Though they united in Zesqua and eventually the surrounding settlements, the merfolk of South-Mareen ever saw their kin in the north as a disgrace to their race; choosing to live on land with a pair of legs like any other, rather than with the unique gift Helix bestowed on them. Ever do they seek to bring North-Mareen under their own rule and force all merfolk to live the way they are supposed to. Though not all merfolk from South-Mareen support this standpoint, Zesqua has been known to act akin this belief.";
+
+    var customPopup12 = "<img src='Maps/Capitals/CarasNymh.jpg' height='300px', width='300px'/><br><b>Caras Nymh, Capital of Nymh</b><br><i>Race: Elves<br>Founded: 64AR</i><br><br> In the heart of the forest of Nymh lies Caras Nymh (Great City of Nymh), home to the elves who departed their former kingdom Lunasyll in 64AR after the clans came to a disagreement on how to venture forth with their laws and relations between the other kingdoms. Nymh became home to the elven clans that sought more solitude and wanted to be closer to nature rather than the inhabitants of Ascentia and their political agendas.<br><br>The woods of Nymh are veiled in magic gifted by the last known unicorn roaming the woods, known as the Lady Amalthea. As long as she remains within the Nymh woods, they remain in a contiuous state of spring. Though magical, the woods are treacherous, lulling their visitors into a misguided feeling of safety, as they are home to a variety of wildlife, both harmless creatures and those that demand a certain respect.";
+
+    var customPopup13 = "<img src='Maps/Capitals/Caelethon.jpg' height='300px', width='300px'/><br><b>Caelethon, Capital of the Hashmal Kingdom</b><br><i>Race: Wild Elves<br>Founded: 677AR</i><br><br> To the north of Destrun lay the forested lands that the wild elves came to inhabit in 64AR after the clans came to a disagreement on how to venture forth with their laws and relations between the other kingdoms. Hashmal become home to a number of elves that choose a more martial and militant way of life over that of studies, wisdom and serene like their kin in Lunasyll and Nymh. They came to be known as Wild Elves, hostile to most others but to their own kin, defending their homelands with vigor from outsiders. <br><br> It wasn't until 677AR that Destrun officially gifted the Hashmal Elves their own kingdom, though they had occupied it for centuries already. This to gain their favor and alliance when the Eastern Kingdoms united.<br>In the heart of the Hashmal Woods lies Caelethon, which has a unique palace build within a great tree amidst a small ravine; one of the wild elves their finest architecture compared to their wild elven kin in the Venosian Forest and the Zenuvean Marches.";
+
+    var customPopup14 = "<img src='Maps/Capitals/Lyss.jpg' height='200px', width='300px'/><br><b>Lyss, Capital of Destrun</b><br><i>Race: Humans/Mix<br>Founded: 39AR</i><br><br> Humans have always had a strong penchant for migration and as such small groups of people would leave their homelands in the west in the early ages to lay claim upon the eastern lands. Though it required fending off the original denizens of the sandy deserts of Destrun, they lay claim to the largest oasis of the land, comfortably lying in the shade of a mountainrange. Lyss was built around it and the deserts were claimed as a kingdom of their own called Destrun in 39AR. Though Lyss was claimed by humans, it does not discriminate and over the years the city became home to those of all races, it's leadership given to a council existing of at least one of most different races.<br><br> Though the eastern kingdoms pride themselves on their lawful and militant statures, Destrun and it's neighbouring kingdom Gandarra are more lax when it comes to laws and rules, realizing that a dose of illegality is profitable to the kingdom. Many illegal trade is done on it's black markets and this political behavior was to be halted when the western kingdoms united and extended their hand to Destrun and Gandarra. The east however, enjoying their lifestyle, did not want to be oppressed by the west and created their own alliance in 677AR between Destrun, Gandarra, the Hashmal Kingdom , Lir's Kingdom and a variety of more civil orc tribes in the Ishtari Wastes.";
+
+    var customPopup15 = "<img src='Maps/Capitals/Zenuvea.jpg' height='300px', width='300px'/><br><b>Zenuvea</b><br><i>Race: Wild Elves<br>Founded: 64AR</i><br><br>In the southern reaches of Ascentia, to the east of North-Mareen, the wild elves came to inhabit the Zenuvean Marches in 64AR after the clans came to a disagreement on how to venture forth with their laws and relations between the other kingdoms. Though not officially a kingdom, Zenuvea is their largest settlement, home to most of the Zenuvean wild elves.<br><br>The elves in the Zenuvean Marches are considered the most ‘wild’ of them all. They spend a great deal of their lives struggling for their existence, as the Zenuvean Marches bring many dangers, not only in the nature of lands, but also with the inhabitants the Zenuvean Elves share their marches with. These inhabitants range from Sirens in the lakes near Mareen to Lizard men who have a large number of settlements within the forest. It is for this reason however, these elves decided to settle down here, as they believe it only serves to hone their skills and senses.";
+
+    var customPopup16 = "<img src='Maps/Capitals/Nebiros.jpg' height='300px', width='300px'/><br><b>Nebiros, Capital of Gandarra</b><br><i>Race: Humans/Mixed<br>Founded: 5AR; Independant since 58AR</i><br><br>Shortly after the Reckoning in 2AR, the people of Crysta sent a small force to the east, beyond the Crevice to erect a fortress bordering the Darkglimpse; a land treacherous and filled with dark and evil creatures. Believing the greatest evils of the land were still permitted to live in this distant land, the western kingdoms felt it was a neccesity to protect themselves from it. The fortress of Nebiros and it's great wall was build, to be a watchpost should any evil ever rise in those lands again.<br><br>Nebiros, so remote from the western kingdoms established a way of living on it's own, expanding and creating their own laws as other travellers made their home within the fortress. In 58AR Crysta gave Nebiros it's independant, granting them the fortress and the surrounding lands, which came to be known as the kingdom of Gandarra.<br><br> In 676AR, Gandarra, though keeping it's militant nature, had long distanced itself from the law-abiding society of the east, adopting a society more akin Destrun. When the alliances were made, Crysta and Entarin came to claim their outpost once again. The siege on Nebiros lasted 2 straight weeks, but the fortress did not fall. When Destrun's forces came to Gandarra's aid, the Western armies were routed and returned home unsuccessfull. A year later, in 677AR, Gandarra joined the eastern alliance, alongside Destrun, the Hashmal Kingdom , Lir's Kingdom and a variety of more civil orc tribes in the Ishtari Wastes.";
+
+    var customPopup17 = "<img src='Maps/Capitals/Glacium.jpg' height='250px', width='300px'/><br><b>Glacium, Capital of Tiberia</b><br><i>Race: Tiberians<br>Founded: 48AR</i><br><br>The tiberians were once the original denizens of the sandy deserts of Destrun before they were claimed as a kingdom by the west. Eventually, though trying to coexist, the tiberians were forced to flee from their homeland to the northeast. The cold mountainous areas of Tiberia were home to a great wyrm named Shinryu, who punished the tiberians for stealing her eggs to survive the cold, tricking and cursing them and the land. Their bodies changed, turning more frost giant than human, though some survived their grim fate and full transformation to Sons of Shinryu thanks to the sacrifice of their chieftain.<br><br>Those sane came to call themselves Tiberians and their magically icy cold land Tiberia, a place so cold that even through magical means it is hard to travel through as anyone else but a Tiberian. Glacium was built in a mountainpass, carved half into the icy mountains, it's halls beneath shimmering with the beauty of sculpted ice, never thawing.";
+
+    var customPopup18 = "<img src='Maps/Capitals/Parthorus.jpg' height='200px', width='300px'/><br><b>Parthorus, Capital of the Kingdom of the Iron Boot</b><br><i>Race: Mixed<br>Founded: 130AR</i><br><br>For a long time in the early ages and even before the Reckoning the east was near uninhabited. It was considered a savage land, as the Kingdom of the Iron Boot is largely jungles; dangerous places that a great many wild creatures call their home. Parthorus is a city at the southern coast one can reach safely by boat, circumventing the jungles and the uncharted lands to the north. It was Vincent Parthorus who first sailed here with a great many men and ships under his command. Rich as he was, from his noble line and illegal activities he was able to raise the city of Parthorus and called the lands his own in 130AR.<br><br> It is known to be a safe haven to pirates and the populace is largely pirates, sailors and those that wish to entertain these types. As their nature is, there is no law to be found in this city or the kingdom. It is a chaotic city, filled with those that will do as they please at all times. The only law that is being kept is that of honor towards the Captain who rules over the city. When this captain dies or likely meets some unfortunate fate on the seas or in the more lawful kingdoms, a new ‘Captain Parthorus’ is chosen through a Captain’s Moot, where a court of prominent pirate captains come together to decide through voting upon the new ‘Captain Parthorus’. In Vincent Parthorus’ honor the name was never changed.";
+
+    var customPopup19 = "<img src='Maps/Capitals/Durn.jpg' height='200px', width='300px'/><br><b>Durn, the Great Orc City</b><br><i>Race: Orcs<br>Founded: Before the Reckoning</i><br><br>The Ishtari Wastes have always seen a lot of strife between the Orc tribes, who see this as a way of life, but sometimes other travelers become target of these vicious attacks. There is but one place that allows access to outsiders and has any law to it; the city of Durn. <br><br> Durn is a crudely made city, consisting largely of stone and large cloths risen on poles to serve as shelter for the sun. Durn is considered a prize-city and its iconic feature is the large arena within. This arena in the early ages served for the most distinguished fighters of the tribes to fight out battles to the death for the honor of their tribe. The last remaining fighter wins this honored tournament for his tribe and he - or another chosen by him - earns the title “High Chieftain” and may take up the throne in Durn. This tribe then rules Durn for 3 years and laws within the city are decided completely by the tribe that holds it for those years. The only law that is continual is that of no bloodshed within Durn’s walls. Those that draw blood of another within Durn are considered punishable by death - often done within the arena. Whether Orc, half-Orc or outsider makes no difference, the only one exempt of this rule is the High Chieftain himself.";
+
+ var customPopup20 = "<img src='Maps/Capitals/Aeon.jpg' height='300px', width='300px'/><br><b>Aeon, the Capital of Lir's Kingdom</b><br><i>Race: Human, Elves, Florians, Fey<br>Founded: 518AR</i><br><br>Before 518AR these lands were in possession of a self-proclaimed king named Haggard. In 15AR he made a pact with a great demonic power who allowed him his desires of capturing the celestial creatures that roamed Ascentia named unicorns. Through the power of a demonic flaming red bull he trapped all but one in the seas beneath his palace. Due to this pact the lands withered, as did the man, but he did not die for centuries. He hunted the last unicorn for his collection with vigor. The demon in the end claimed Haggard's life, leaving the dry and dreary lands to Haggard's son; Lir - both of whom lived unnaturally long due to the unicorns their presence. Lir, the complete opposite of his father sought to refertilize the lands and make his kingdom flourish.<br><br>When he came in contact and fell in love with the Lady Amalthea from Nymh, his wishes come true as she helped him bring life back to his lands. Though she departed, Lir rules his land with kindness and peace, offering home to all creatures of nature. In the dry wastes of the east, it is considered to be a small paradise.";
+
+ var customPopup21 = "<img src='Maps/Capitals/Claudus.jpg' height='200px', width='300px'/><br><b>Claudus, Home of the Khemti</b><br><i>Race: Khemti<br>Founded: 170AR</i><br><br>Located in Jazargo Jungle on the border of the clearing Khemti's Dawn lies the town of Claudus, home of the Khemti.<br>In 170AR when Robert Khemti; son of the current Captain of Parthorus and his friends came to aid of the catfolk in the jungle the Khemti were born in that very clearing. Half human, half catfolk, the Khemti settled with ease into the jungles of the Kingdom of the Iron Boot, creating their own settlements and tribes as the years progressed, but Claudus stands in honor of the elder that merged with Robert Khemti as their main town.";
+
+ var customPopup22 = "<img src='Maps/Capitals/Yngmir.jpg' height='200px', width='300px'/><br><b>Yngmir, Home of the Skjöldir</b><br><i>Race: Skjöldir<br>Founded: Before the Reckoning</i><br><br>Located to the east of Tiberia the Skjöldir were actually the first to inhabit the northern lands. When the Tiberians came north from Destrun they claimed the lands as theirs with their newfound strength through the curse and a large war between the Skjöldir and the Tiberians erupted. Under the threat of a common enemy they united in the end and agreed to live in peace in the kingdom of Tiberia together. Yngmir is considered the capital of the Skjöldir, named after the kingdom in Tenebrae where long before the Reckoning the first Skjöldir sailed from.";
+
+ var customPopup23 = "<img src='Maps/Capitals/Rovarrin.jpg' height='200px', width='300px'/><br><b>Rovarrin, the Capital of the Rovarrin Isles</b><br><i>Race: Kaonash, Mixed<br>Founded: Before the Reckoning</i><br><br>Located to the south of the mainland of Ascentia lay the Rovarrin Isles. When the Shadowborn Brothers surfaced and assaulted the main lands of Ascentia during the Dark Ages, Rovarrin was kept safe by the magic of the dragon Shinryu. There were those who tried to aid the mainland of Ascentia, but came upon their own downfall and curse in the Netherworld; they are known as the Kaonash. The ancient ways build upon peace and honor are held in high regard in Rovarrin. It's architecture and way of life is what many describe as oriental.";
+
+ var customPopup24 = "<img src='Maps/Capitals/Laboulaye.jpg' height='200px', width='300px'/><br><b>Laboulaye, the Capital of the Labuan Archipelago</b><br><i>Race: Human<br>Founded: Before the Reckoning<br>Destroyed: 872AR</i><br><br>Located to the south of the mainland of Ascentia and to the east of the Rovarrin Ilses lay the Labuan Archipelago. Where Rovarrin considered itself a part of Ascentia and used their ships to trade with the mainland before the Dark Ages and after the Reckoning, the king of the Labuan Archipelago decreed to keep themselves out of the affairs of Ascentia. They provided for themselves and were not kind to strangers coming to their shores. It was in 872AR that the Labuan Archipelago found their destruction by the Blackwater Being. It surfaced first on Labuan and it and it's minions devoured the isles of Labuan and erased it from Concordia. Before their destruction they ensured the artifacts needed to keep the creature at bay were scattered throughout the world and were later retrieved and fashioned to the Lithien Lighthouses.";
+
+ var customPopup25 = "<img src='Maps/Capitals/Kalevalan.jpg' height='200px', width='300px'/><br><b>Kalevalan, Home of the Oruns</b><br><i>Race: Orun<br>Founded: 164AR</i><br><br>Located in the west of Arcadia lies the capital of the Oruns: Kalevalan. In 127AR the Oruns first came to Ascentia without any knowledge of where they came from or what had happened when they stepped through a portal that deactivated upon their arrival. For a long time the Oruns remained reclusive and sought to repair the gate, but it was to no avail. They befriended the wizards of Arcadia and with their unique knowledge of magical items and how to craft them were welcomed. With aid from the inhabitants of Arcadia the Oruns build their beautiful city of Kalevalan and settled down in their new home and world.";
+
+
+// Capital Markers
+var goldenhalls = L.marker([46.75492, -144.4043], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup1),
+
+venosia = L.marker([35.72868, -130.47363], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup2),
+
+virconium = L.marker([36.985, -118.25684], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup3),
+
+erdunar = L.marker([43.18115, -107.22656], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup4),
+
+emalon = L.marker([31.9708, -106.67725], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup5),
+
+arlathan = L.marker([25.04579, -128.14453], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup6),
+
+highwind = L.marker([17.6859, -147.32666], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup7),
+
+lighthaven = L.marker([10.98434, -119.53125], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup8),
+
+essos = L.marker([0.54931, -117.59766], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup9),
+
+myrthana = L.marker([-0.83493, -94.57031], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup10),
+
+zesqua = L.marker([-13.49647, -98.04199], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup11),
+
+carasnymh = L.marker([-28.13013, -145.59082], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup12),
+
+caelethon = L.marker([36.52729, -81.01318], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup13),
+
+lyss = L.marker([23.62439, -69.23584], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup14),
+
+zenuvea = L.marker([-10.20681, -79.38721], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup15),
+
+nebiros = L.marker([5.63785, -45.02197], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup16),
+
+glacium = L.marker([40.12849, -29.15771], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup17),
+
+parthorus = L.marker([-34.59704, -28.8501], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup18),
+
+durn = L.marker([26.4509, -43.43994], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup19),
+
+aeon = L.marker([-14.51978, -51.15234], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup20),
+
+claudus = L.marker([-9.0804, -25.09277], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup21),
+
+yngmir = L.marker([17.41355, -7.36084], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup22),
+
+rovarrin = L.marker([-24.50714, -94.021], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup23),
+
+labuan = L.marker([-38.03079, -66.5332], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup24),
+
+kalevalan = L.marker([45.058, -65.78613], {
+opacity: 1,
+icon: rStarIcon
+}).bindPopup(customPopup25);
+
+// Capital Group
+var capitals = L.layerGroup([goldenhalls, venosia, virconium, erdunar, emalon, arlathan, highwind, lighthaven, essos, myrthana, zesqua, carasnymh, caelethon, lyss, zenuvea, nebiros, glacium, parthorus, durn, aeon, claudus, yngmir, rovarrin, labuan, kalevalan]);
+
+
+// Towns Custom Popups
+var customPopupt1 = "<img src='Maps/Towns/Crondain.jpg' height='300px', width='300px'/><br><b>Crondain Temple</b><br><i>Worshipped Deity: Aurum, the Father</i><br><br>Located on the highest Peak of Ascentia - the Roof of the Sky - the temple dedicated to Aurum is one of the hardest to reach due to its location. The mountains are perilous and the path not often travelled. Crondain Temple, or otherwise known as Cloud Temple lies high above the clouds, forever bathing in the sun’s rays. Cloud Temple is a place of rest, peace and reflection upon the journey made. It is the final destination of the Divine Pilgrimage.";
+
+var customPopupt2 = "<img src='Maps/Towns/Exoray.jpg' height='400px', width='250px'/><br><b>Exoray Temple</b><br><i>Worshipped Deity: Eldrim, the Magnificent</i><br><br>Located in a remote location in Brolgar lies the temple dedicated to Eldrim.  Exoray Temple is arguably one of the most uniquely architecture destinations of the Divine Pilgrimage. The whole temple consists of cogs and wheels the gnomes had fashioned in honor of Eldrim, so he may see them to be true craftsmen. It is rumored a mechanic was built within the top of the tower that allows one to gaze upon the stars from a great distance.";
+
+var customPopupt3 = "<img src='Maps/Towns/Garnia.jpg' height='300px', width='300px'/><br><b>Garnia Temple</b><br><i>Worshipped Deity: Althea, the Mother</i><br><br>Located within the Forests of Lunasyll is the entrance to the temple dedicated to Althea. Garnia temple exists in a realm between the Spiritual Plane and the Material World, as if existing within the Veil itself. There is an ethereal calm that lies over Garnia Temple, where the only light is that of an everlasting moon.";
+
+var customPopupt4 = "<img src='Maps/Towns/Karkanos.jpg' height='300px', width='300px'/><br><b>Karkanos Temple</b><br><i>Worshipped Deity: Helix the Enlightened</i><br><br>Located on the border between North- and South-Mareen lies the temple dedicated to Helix. The Karkanos Temple appears to be a grand cathedral sunk to the bottom of the ocean, remarkably is that those unable to breathe underwater like the Merfolk are able to breathe here as if there was air. It is often visited by Merfolk who desire to learn the ways of Helix to be able to transform their human legs into a merfolk tail or vice versa. Despite the strife between the merfolk of North- and South-Mareen this place is considered a sacred ground where all are welcomed.";
+
+var customPopupt5 = "<img src='Maps/Towns/Koronian.jpg' height='400px', width='300px'/><br><b>Koronian Temple</b><br><i>Worshipped Deity: Zanteran of the Mountains</i><br><br>Located within a mountainside in Trondinar lies the temple dedicated to Zanteran. The entrance to Koronian Temple is most easily recognized by the large dwarven statue guarding its entrance. It is rumored those unworthy of the temple are not allowed entrance and few of a more unsavory nature have ever dared to try their luck passing the intimidating statue.";
+
+var customPopupt6 = "<img src='Maps/Towns/Kyrelia.jpg' height='400px', width='250px'/><br><b>Kyrelia Temple</b><br><i>Worshipped Deity: Lyarra of the Forests</i><br><br>Located deep within the Forests of Nymh stands an elder tree, believed to have been the very first one Lyarra herself created. Among the roots of the tree lies the entrance to the temple dedicated to Lyarra. Though it goes underground, the light that shines over the elder tree seems to radiate through the tree itself and so the temple itself is bathed in a beautiful soft green light.";
+
+var customPopupt7 = "<img src='Maps/Towns/Pelamar.jpg' height='400px', width='250px'/><br><b>Pelamar Temple</b><br><i>Worshipped Deity: Gaulir the Benevolent</i><br><br>Located in the Zenuvean Marches lies the temple dedicated to Gaulir. Pelamar Temple is the only temple that does not lie within its native kingdom, but despite that is uniquely accessed. The entrance of Pelamar Temple is but a small structure, rumored to be the home of a fey creature. She is the guardian to the temple and offers its visitors the first trial before they can even access the temple. If proven to be worthy she teleports them to the temple, which lies hidden in a inaccessible valley upon Ascentia.";
+
+var customPopupt8 = "<img src='Maps/Towns/Xiphos.jpg' height='200px', width='300px'/><br><b>Xiphos Temple</b><br><i>Worshipped Deity: Ramaloth the Repented</i><br><br>Located in the Destrun deserts lies the temple dedicated to Ramaloth. The Xiphos Temple is home to the guild of Xiphos, who beliefs by Ramaloth’s destiny that all can be redeemed. Xiphos therefore is perhaps less of a traditional temple and more of a rehabilitant prison for criminals they have recruited to give another chance. Around its perimeter lies an invisible barrier that keeps the temple’s protégé’s from leaving until they have, in Ramaloth’s eyes, redeemed themselves.";
+
+    var customPopupt9 = "<img src='Maps/Towns/CoralsHeart.jpg' height='300px', width='300px'/><br><b>Coral's Heart</b><br><br>Coral's Heart is one of the few locations that is considered neutral in the conflict between North and South-Mareen, choosing to provide a home to merfolk both on land and beneath the ocean waves. In that thought the town was erected both above and beneath the island, offering each family a home on both sides.";
+ 
+    var customPopupt10 = "<img src='Maps/Towns/Shynlee.jpg' height='300px', width='300px'/><br><b>Shynlee Monastery<br></b><i>Academy of the Blind</i><br><br>Shynlee Monastery was founded in 102AR by a man named Shynlee, who decided to better his life after realising the truth about the Aereth Locket's, of which he owned one. Now Shynlee Monastary is famed for teaching those with impaired seeing abilties how to fight in various manners from various teachers. Even those with full eyesight sometimes decide to come to Shynlee to learn the art of blindfighting. Ever do the Shynlee members seek the remaining Lockets of Aereth, so she may one day become whole and cleansed again.";
+
+    var customPopupt11 = "<img src='Maps/Towns/Faernaa.jpg' height='300px', width='300px'/><br><b>Faernaa Temple</b><br><i>House of the Holy</i><br><br>Faernaa Temple was a temple made for those who believe in the most holy. Not dedicated to a particular deity, those with and without divine capabilities come here to be taught the skills of faith and healing. In the times magic was shunned from the land it is said there was a secret hidden part to the temple that educated those with magical powers to handle and contain their powers.";
+
+    var customPopupt12 = "<img src='Maps/Towns/Furion.jpg' height='300px', width='300px'/><br><b>Furion Port</b><br><i>Harbour of Hope</i><br><br>Furion Port is the largest port in the Karthax Planes and once Crysta became divided around 92AR, Furion Port became the main avenue for the Crystanian forces and trades to come to the south. Furion Port was named the Harbour of Hope in 516 AR when Belial had laid sieged to the forests of Nymh in search of the Lady Amalthea. Thanks to the allied forces of the west and the troops that marched from Furion Port, Belial fell.";
+
+    var customPopupt13 = "<img src='Maps/Towns/Orion.jpg' height='300px', width='300px'/><br><b>Orion Port</b><br><br>Orion Port is Crysta's largest port for trade across Ascentia, bringing a variety of trade from the dwarven kingdoms and further around south to Mareen and the lands beyond. The two grand statues greeting it's visitors were build in honor of the great generals Orion and Furion, who sailed from this port to Furion Port and led the Crystanian forces to victory in 516AR. <br><br>Besides this, it is known for the port Grand Wizard Remington Cornelius left Crystanian shores after magic was shunned from Crysta in 114AR, many have tried to follow by ship into the Great Seas away from Ascentia, but the seas are large and treacherous and none have yet returned.";
+
+    var customPopupt14 = "<img src='Maps/Towns/LornarsHeart.jpg' height='300px', width='300px'/><br><b>Lornar's Heart</b><br><br>At the start of a part of the River Lornar a group of priests build a sanctuary in honor of the Lady Amalia, worshipping her at what they believe is the start of the river Lorna, from which all life flows.";
+
+    var customPopupt15 = "<img src='Maps/Towns/Overcross.jpg' height='350px', width='300px'/><br><b>Overcross</b><br><br>Overcross is a unique harbor in the east River Lornar, where the river descends downwards and created a waterfall and the land created a arch over the river. Some great architects from Erdunar and inventors from Brolgar came together and fashioned a gargantuan sluice, able to ascend and descend ships over the waterfall without issue. The city of Overcross was build over the arch and beside the riverside to entertain the sailors awaiting their ship's ascend or descend.";
+
+    var customPopupt16 = "<img src='Maps/Towns/Blackcove.jpg' height='300px', width='300px'/><br><b>Blackcove</b><br><br>Blackcove is infamous port hidden in the north of Mount Kinroyal, dealing in illegal and shady trade. It's location is kept a secret to any who would reveal this information to the authorities by any means. Those that sail for Blackcove are not for the feint of heart, but those that have earned themselves a reputation within Blackcove find it quite a lucrative port to stop by on their travels.";
+
+    var customPopupt17 = "<img src='Maps/Towns/Esterloch.jpg' height='200px', width='300px'/><br><b>Esterloch Village</b><br><br>The small poor village of Esterloch, home to those with the smallest purse that are disallowed entry to the rich Emalon. Ever in the magnificent's city shade it survives from it's lumbering trade.<br><br> From 702AR to 712AR they would have income from visitors that would travel from far and wide to meet the Witch of Linguin Forest, who could not be visited until a specific timely ritual was performed. While waiting they would remain in Esterloch Village, often at the local inn; Hazel's Brews.";
+
+    var customPopupt18 = "<img src='Maps/Towns/Greycloak.jpg' height='250px', width='300px'/><br><b>Greycloak Fortress</b><br><br>Greycloak Fortress is an ancient fortress that was build in the early ages as a defense against the creatures from the Noxian Woods. When the threat diminished thanks to the Noxians that came to inhabit and protect the borders and the forces of Entarins, the fortress became abandoned. <br><br>In 516AR during Belial's Demonic March it was reinstated as a safe house for the Royal Family and was fully rebuild from the nearby mines. Henceforth it became a fortress to train the forces of Entarin. Between the inner and outer walls the town of Greycloak was build, home to the families of the soldiers and guards in training.<br><br>In 712AR Greycloak became home to the Spellguard, a force to deal with the out of control use of magic in the kingdom with the permission of King Bronson. There the Spellguard train the forces of Entarin as Spellguards.";
+
+    var customPopupt19 = "<img src='Maps/Towns/GinreonHold.jpg' height='400px', width='300px'/><br><b>Ginreon Hold</b><br><br>When one decends down elevators alongside the cliff bordering the sea, one can reach the town of Ginreon Hold. Though more fortress and militant outpost than town, over the ages people - mostly relatives to those stationed there - have come to build their homes in Ginreon Hold. The guard's function is ever to guard the Deep Doors, which lead to the Deep Cross and to send supplies into Deep Cross once a month since 748AR.";
+
+    var customPopupt20 = "<img src='Maps/Towns/Silverglen.jpg' height='200px', width='300px'/><br><b>Silverglen</b><br><br>The small town of Silverglen, stretched thin across fields on it's outer borders, but at it's heart a unwalled village that survives mostly off it's mining trade from the nearby mountains.<br><br>In 971AR Silverglen befell a gruesome fate when it's mayor tried to gain wealth and power, tricking the adventurers Alaric Ranulfsonn, Alana Corvain, Khyar A'rthaiye and Faye Dawntreader into believing the local uprising - almost all the men of the village - were bandits and the heroes believed to be the mayor's men. Most fell, if not all, before the heroes realised the trickery and stopped the greater threat at hand - a portal that had opened to Laywind Peak, ready to let through the destructive powers of the Elder Dragon Kolairoth. Fortunately the dragon was defeated at the hand of the heroes, but Silverglen was left without their men and mayor.";
+
+    var customPopupt21 = "<img src='Maps/Towns/Wingard.jpg' height='200px', width='300px'/><br><b>Wingard</b><br><br>The great port city of Wingard, located at the Crystanian Bay. A large and influential city of Crysta, known for it's splendor and diversity in it's citizens. Though not the capital of Crysta, it was certainly a competitor for the title, but was found to be at a more vulnerable position by the sea than Highwind. Despite this, Wingard has it's own palace and seat for the King, where some kings over the decades decided to rule from at certain periods in their reign.<br><br>In 712AR the great threat of the risen King Castor Meriador raged across the kingdom of Crysta, to a point the entire of Wingard was evacuated, believing it was to fall to Meriador's evil next. However, as the dark armies advanced to Wingard it was spared it's fate thanks to Meriador's defeat by the hands of Alaric Ranulfsonn, Alana Corvain, Khyar A'rthaiye and Faye Dawntreader.";
+
+    var customPopupt22 = "<img src='Maps/Towns/Evernur.jpg' height='200px', width='300px'/><br><b>Evernur</b><br><br>The city of Evernur located between the mountainranges has ever been a home to those in need of help. Living as a tradecity on the road in northern Crysta it fairs well.<br><br>It was in 971AR that Castor Meriador's armies of darkness laid siege to Evernur and it fell, few survivors were left amongst it's ruins, but the forces of Crysta were determined not to let the city fall. Unfortunately Meriador's might grew by the day and there was little to do but to escape with what few forces remained behind, but when Meriador fell later that year, many efforts were given to rebuild Evernur to the once beautiful city it was.";
+
+    var customPopupt23 = "<img src='Maps/Towns/Grimwatch.jpg' height='250px', width='300px'/><br><b>Whitehold / Grimwatch</b><br><br>Whitehold is a small keep build in 830AR for King Corin Paladinsson's true love Lea Meriador, an elven maiden born to a family of misfortune. Though her father Arden disapproved, she vowed to love Corin Paladinsson, despite his obligations to the throne of Crysta. Though he visited her often in secret and Lea, thanks to King Paladinsonss good friend King Torgrim Ranulfsonn didn't lack for anything but the man she loved, life was difficult for 20 years. It was then that Lea was killed by decree of Castor Meriador and Whitehold became an empty keep for years.<br><br>In 971AR, when Castor Meriador came from his frozen tomb he made his base in Whitehold to regain his strengths. Abandoned long ago, noone was aware of his location and slowely but surely the once beautiful white keep turned into a dark black citadel, home to King Castor Meriador. It was here the end of his reign and life finally came at the hands of Alaric Ranulfsonn, Alana Corvain, Khyar A'rthaiye and Faye Dawntreader.";
+
+    var customPopupt24 = "<img src='Maps/Towns/Crim.jpg' height='250px', width='300px'/><br><b>Village of Crim</b><br><br>The Village Crim, laying at the footsteps of the great mountainrange, which holds the famous mountain 'Roof of the Sky'.<br><br>In 1202, during the 'Long Night' Crim was one of the many villages which fell to the drows, though it was one of the few that was liberated in the early days of the resistance. By the hands of Rokthar Othkan, Illian Thane, Mudoros Warmond, Ruven and Ellara Seraphim the inhabitants of Crim were freed, but the village itself abandoned.";
+
+    var customPopupt25 = "<img src='Maps/Towns/Rimrain.jpg' height='250px', width='300px'/><br><b>Castle Rimrain</b><br><br>Castle Rimrain was long ago erected as a defense to the sacred mountain and atop it Crondain Temple. Though Aurum was no longer widely worshipped, Crondain was sacred grounds and a treasured temple to Crysta, so the king made sure it would not fall like the others did in the Dark Ages before the Reckoning. Rimrain overtime became a defensive outpost more than a checkpost for Crondain and as the ages progressed, eventually became deserted and fell to ruin.";
+
+
+// Towns Markers
+var crondain = L.marker([32.24997, -143.94287], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt1),
+
+exoray = L.marker([35.13788, -122.49756], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt2),
+
+garnia = L.marker([20.89987, -125.79346], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt3),
+
+karkanos = L.marker([-8.05923, -100.06348], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt4),
+
+koronian = L.marker([45.10455, -123.70605], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt5),
+
+kyrelia = L.marker([-23.50355, -137.65869], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt6),
+
+pelamar = L.marker([9.44906, -80.33203], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt7),
+
+xiphos = L.marker([28.28503, -73.34473], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt8),
+
+coralsheart = L.marker([-5.48477, -97.00928], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt9);
+
+shynlee = L.marker([10.59582, -107.53418], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt10);
+
+faernaa = L.marker([-1.62576, -156.73096], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt11);
+
+furion = L.marker([-1.64772, -129.22119], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt12);
+
+orion = L.marker([12.06081, -156.81885], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt13);
+
+lornarsheart = L.marker([28.97931, -126.23291], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt14);
+
+overcross = L.marker([35.76434, -100.37109], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt15);
+
+blackcove = L.marker([44.87144, -108.12744], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt16);
+
+esterloch = L.marker([32.58385, -103.5791], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt17);
+
+greycloak = L.marker([26.09625, -109.2041], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt18);
+
+ginreonhold = L.marker([19.35261, -141.06445], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt19);
+
+silverglen = L.marker([32.10119, -131.06689], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt20);
+
+wingard = L.marker([18.68788, -142.00928], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt21);
+
+evernur = L.marker([27.78077, -141.48193], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt22);
+
+grimwatch = L.marker([48.79239, -147.30469], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt23);
+
+crim = L.marker([29.17135, -148.84277], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt24);
+
+rimrain = L.marker([29.30556, -147.2168], {
+opacity: 1,
+icon: bCircleIcon
+}).bindPopup(customPopupt25);
+
+// Towns Group
+var towns = L.layerGroup([crondain, exoray, garnia, karkanos, koronian, kyrelia, pelamar, xiphos, coralsheart, shynlee, faernaa, furion, orion, lornarsheart, overcross, blackcove, esterloch, greycloak, ginreonhold, silverglen, wingard, evernur, grimwatch, crim, rimrain]);
+
+
+// Landmarks Custom Popups
+    var customPopuplm1 = "<img src='Maps/Landmarks/ArchEscalon.jpg' height='300px', width='300px'/><br><b>The Arch of Escalon</b><br><br>The Arch of Escalon depicts the great elven leaders; the brothers Arlathan, who first ruled the elven kingdom of Lunasyll from Arlathan's seat.";
+
+    var customPopuplm2 = "<img src='Maps/Landmarks/ArlathanExpanse.jpg' height='300px', width='300px'/><br><b>The Arlathan Expanse</b><br><br>The Arlathan Expanse is situated on a extending plateau from the mountain beneath the city of Arlathan, home to a variety of friendly creatures.";
+
+    var customPopuplm3 = "<img src='Maps/Landmarks/Crevice.jpg' height='400px', width='300px'/><br><b>The Crevice</b><br><br>When the Reckoning happened, the old Dragon Gods and their armies fought the armies of darkness led by the Shadowborn Brothers. In the end they prevailed and casted the three brothers into a prison within the Abyss, literally splitting the earth as they cast them down - this created the Crevice. They say dark creatures still linger at it's depths, feeding on the energies the Shadowborn Brothers left behind.";
+
+    var customPopuplm4 = "<img src='Maps/Landmarks/Elingi.jpg' height='300px', width='300px'/><br><b>The Elingi Burial Grounds</b><br><br>During the Reckoning a great many lifes were taken, most of which during the final battle. When the old Dragon Gods left the material plane and left the world in the hands of the new Divine Pantheon, the people of Ascentia came together to mourn the loss of all those that had fallen. Under endless fields of Elingi Flowers an expansive labyrinth of crypts were dug where all those that had fallen during the Reckoning were given the honor to be buried. Every year on Luxens 5th Blossom people travel from all across Ascentia to light candles at sunset, praying for the fallen souls.";
+
+    var customPopuplm5 = "<img src='Maps/Landmarks/Gromite.jpg' height='350px', width='300px'/><br><b>The Gromite Gates</b><br><br>Before the Reckoning, during the Dark Ages, the dwarves of Trondinar created the Golgoroth Labyrinth with the great Gromite Gates at it's entrance. The Gromite Gates are great stone doors that lead into the Golgoroth Labyrinth.<br><br>In 2AR Kor, brother to Medreor tore down the Gromite Gates, wanting to prove his might and ascend like his brother, but instead lost his kingdom to the creatures from the Underdark that still flooded the Labyrinth. In 87AR Erdun, Kor's son, fought with his armies to regain control of the Golden Halls and the entire kingdom of Trondinar. The new Gromite Gates were rebuild and henceforth the Gromite Gates were only opened for those who went through a form of trial in the Golgoroth Labyrinth to prove one's strength in the dwarven society.";
+
+    var customPopuplm6 = "<img src='Maps/Landmarks/Golgoroth.jpg' height='350px', width='300px'/><br><b>The Golgoroth Labyrinth</b><br><br>Before the Reckoning, during the Dark Ages, the dwarves of Trondinar created the Golgoroth Labyrinth with the great Gromite Gates at it's entrance. A giant passage to the Underdark opened between the Spineshatter and Nethermountains and creatures flooded from it. To halt their advance, the dwarves erected a giant labyrinth, realising a great wall would be subject to siege, but a labyrinth would leave the forces of the Underdark scattered, weakened and confused and it worked magnificently.<br><br>In 2AR Kor, brother to Medreor tore down the Gromite Gates, wanting to prove his might and ascend like his brother, but instead lost his kingdom to the creatures from the Underdark that still flooded the Labyrinth. In 87AR Erdun, Kor's son, fought with his armies to regain control of the Golden Halls and the entire kingdom of Trondinar. The new Gromite Gates were rebuild and henceforth the Gromite Gates were only opened for those who went through a form of trial in the Golgoroth Labyrinth to prove one's strength in the dwarven society.";
+
+    var customPopuplm7 = "<img src='Maps/Landmarks/Zaurus.jpg' height='350px', width='300px'/><br><b>The Mouth of Zaurus</b><br><br>The great dwarven gates that lead from the kingdom of Crysta, through the mountainrange surrounding the Roof of the Sky to the dwarven kingdom of Trondinar.";
+
+    var customPopuplm8 = "<img src='Maps/Landmarks/FrozenHeart.jpg' height='200px', width='300px'/><br><b>The Frozen Heart</b><br><br>Buried deep beneath the Spineshatter Mountains is a frozen lair that became home to the imprisoned Castor Meriador in 647AR, after he tried to start a great war between in the western kingdoms between the humans, elves, dwarves and on his side - the drow.<br><br>In 971AR through clever deceit and plotting from his descendant, Castor Meriador was released from his tomb by the hands of Alaric Ranulfsonn, Alana Corvain, Khyar A'rthaiye and Faye Dawntreader.";
+
+    var customPopuplm9 = "<img src='Maps/Landmarks/KomaliaPass.jpg' height='400px', width='250px'/><br><b>The Komalia Pass</b><br><br>The cape of Komalia at it's base is a great iceberg. It was said the Komalia Pass was created when a humongous shark cornered by an even greater evil around 680AR in fear ran through the ice itself, splitting the cape in two and finding his demise there.";
+
+    var customPopuplm10 = "<img src='Maps/Landmarks/CamthanStronghold.jpg' height='250px', width='300px'/><br><b>Camthan Stronghold</b><br><br>The Camthan Stronghold is a grand burial site in a clearing within the Lunasyll Woods. All the elven heroes and important individuals of Lunasyll and those that had proven their worth to the elves were laid to rest within the Camthan Stronghold. Surrounded not by walls, but by large pillars the place is a holy site to the elves, disturbing it's graves is punishable by death.";
+
+    var customPopuplm11 = "<img src='Maps/Landmarks/Deepcross.jpg' height='400px', width='300px'/><br><b>The Deep Cross</b><br><br>Beyond the Deep Doors, guarded by the Crystanian forces stationed at Ginreon Hold lies the Deep Cross. In 748AR, led by High Wizard Doran, a small civil war arose in Wingard, threatening the king and the people. Though quite the uprising in Wingard, it was contained within the city before it's influence spread. King Ginreon had Ginreon Hold and Deep Cross build within the cliffwall north of Wingard, where beyond the Deep Doors the participants found guilty of the uprising were sentenced to imprisonment. Each month they receive supllies from Ginreon Hold, but life in the Deep Cross is filthy, dangerous and far beneath human standards. Their fate and that of their descendants is sealed however, as none ever leave the Deep Cross.";
+
+    var customPopuplm12 = "<img src='Maps/Landmarks/LaywindPeak.jpg' height='250px', width='300px'/><br><b>Laywind Peak</b><br><br>Laywind Peak, known as the one of the coldest and highest peaks of the western part of Ascentia high upon Mount Kinroyal. It was the home of the elder dragon Kolairoth, who made it's snowy caverns his solitary home.<br><br>In 712AR, when the evil King Castor Meriador was freed from his frozen tomb, Kolairoth fell to his power and became an enslaved mind. Tasked to aid the armies of Meriador once a summoning portal in Silverglen Mines would allow him passage, Kolairoth could not break the spell upon him. He kidnapped Meriador's niece Lea, who was under a spell from her father Arden Meriador so Castor could see his brother suffer for his insolence. This however, eventually only led to the downfall of Kolairoth, who fell before the might of the heroes Alaric Ranulfsonn, Alana Corvain, Khyar A'rthaiye and Faye Dawntreader and Laywind Peak became his final resting place.";
+
+    var customPopuplm13 = "<img src='Maps/Landmarks/SilverglenMines.jpg' height='300px', width='300px'/><br><b>The mines of Silverglen</b><br><br>The mines of Silverglen, the main source of income for the town that shipped the ores across the Eastern Kingdoms.<br><br>In 712AR it became the outpost for the men who had formed a resistance against their suppressing mayor. Unfortunately it also became their final resting place when through a great scheme created by the mayor, the men attacked the heroes Alaric Ranulfsonn, Alana Corvain, Khyar A'rthaiye and Faye Dawntreader and fell to their might.";
+
+// Landmarks Markers
+var archescalon = L.marker([24.94622, -120.89355], {
+opacity: 1,
+icon: bTriangleIcon
+}).bindPopup(customPopuplm1),
+
+arlathanexpanse = L.marker([24.62704, -127.61719], {
+opacity: 1,
+icon: bTriangleIcon
+}).bindPopup(customPopuplm2),
+
+crevice = L.marker([18.77112, -88.19824], {
+opacity: 1,
+icon: bTriangleIcon
+}).bindPopup(customPopuplm3),
+
+elingi = L.marker([29.24806, -98.32764], {
+opacity: 1,
+icon: bTriangleIcon
+}).bindPopup(customPopuplm4),
+
+gromite = L.marker([44.33957, -133.74756], {
+opacity: 1,
+icon: bTriangleIcon
+}).bindPopup(customPopuplm5),
+
+golgoroth = L.marker([47.15984, -131.17676], {
+opacity: 1,
+icon: bTriangleIcon
+}).bindPopup(customPopuplm6),
+
+zaurus = L.marker([32.78727, -147.10693], {
+opacity: 1,
+icon: bTriangleIcon
+}).bindPopup(customPopuplm7);
+
+frozenheart = L.marker([47.05515, -153.63281], {
+opacity: 1,
+icon: bTriangleIcon
+}).bindPopup(customPopuplm8);
+
+komalia = L.marker([12.68321, -141.43799], {
+opacity: 1,
+icon: bTriangleIcon
+}).bindPopup(customPopuplm9);
+
+camthan = L.marker([23.70489, -131.04492], {
+opacity: 1,
+icon: bTriangleIcon
+}).bindPopup(customPopuplm10);
+
+deepcross = L.marker([19.33188, -141.74561], {
+opacity: 1,
+icon: bTriangleIcon
+}).bindPopup(customPopuplm11);
+
+laywindpeak = L.marker([46.02748, -106.1499], {
+opacity: 1,
+icon: bTriangleIcon
+}).bindPopup(customPopuplm12);
+
+silverglenmines = L.marker([31.98944, -130.47363], {
+opacity: 1,
+icon: bTriangleIcon
+}).bindPopup(customPopuplm13);
+
+// Landmarks Group
+var landmarks = L.layerGroup([archescalon, arlathanexpanse, crevice, elingi, gromite, golgoroth, zaurus, frozenheart, komalia, camthan, deepcross, laywindpeak, silverglenmines]);
+
+
+
+// Waystones Custom Popups
+
+	var customPopupws1 = "<img src='Maps/Capitals/Waystonebanner.png' height='130px', width='300px'/><b>Waystone Location</b><br><br>Helix's Weave allows for those with magical capabilities to teleport through the world; one moment in one place, the next in another. But without the use of a waystone crystal and attuned waystones a teleport spell does not function. A waystone crystal is a small crystal attuned to Helix's weave that allows any wielder and a select few in physical contact with him to traverse distance to any waystone he has previously attuned to. A waystone crystal is personal and binds itself to it's master, any waystones a previous master has attuned to are erased and the new owner must make the journey and attune his or her own personal crystal to waystones in the world.";
+
+
+// Waystones Markers
+
+waystone1 = L.marker([46.76997, -144.53613], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone2 = L.marker([37.00255, -118.43262], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone3 = L.marker([43.18115, -107.40234], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone4 = L.marker([31.98944, -106.83105], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone5 = L.marker([25.0657, -128.29834], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone6 = L.marker([27.80021, -141.63574], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone7 = L.marker([17.70683, -147.48047], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone8 = L.marker([7.27529, -127.37549], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone9 = L.marker([0.54931, -117.72949], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone10 = L.marker([-7.4932, -124.43115], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone11 = L.marker([-28.13013, -145.72266], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone12 = L.marker([-24.50714, -94.1748], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone13 = L.marker([-13.47511, -98.17383], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone14 = L.marker([-0.83493, -94.72412], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone15 = L.marker([16.27796, -75.52002], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone16 = L.marker([23.60426, -69.36768], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone17 = L.marker([5.65972, -45.17578], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone18 = L.marker([33.57801, -60.71045], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone19 = L.marker([40.14529, -29.31152], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone20 = L.marker([17.41355, -7.51465], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone21 = L.marker([-9.0804, -25.26855], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone22 = L.marker([-14.51978, -51.30615], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone23 = L.marker([-34.59704, -29.00391], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone24 = L.marker([-42.45589, -10.15137], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone25 = L.marker([46.30141, -48.40576], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone26 = L.marker([45.08904, -65.91797], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone27 = L.marker([-9.18887, 33.61816], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone28 = L.marker([-19.62189, 36.12305], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone29 = L.marker([-34.84988, 37.90283], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone30 = L.marker([-28.94086, 30.23438], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone31 = L.marker([-19.43551, 54.84375], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone32 = L.marker([-23.92601, 71.16943], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone33 = L.marker([-5.35352, 78.57422], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone34 = L.marker([3.16246, 67.39014], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone35 = L.marker([-17.09879, 87.64893], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone36 = L.marker([-30.93992, 91.53809], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone37 = L.marker([-30.65682, 103.53516], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone38 = L.marker([-30.92108, 115.51025], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone39 = L.marker([-34.03445, 129.44092], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone40 = L.marker([-35.99579, 143.21777], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone41 = L.marker([-22.22809, 143.76709], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone42 = L.marker([-19.49766, 119.88281], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone43 = L.marker([-8.16799, 126.43066], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone44 = L.marker([0.21973, 133.17627], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone45 = L.marker([13.56056, 130.07813], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone46 = L.marker([15.49603, 152.46826], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone47 = L.marker([-9.31899, 112.91748], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone48 = L.marker([0.19775, 105.29297], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone49 = L.marker([11.80283, 104.63379], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone50 = L.marker([19.45623, 96.04248], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone51 = L.marker([4.03962, 50.25146], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone52 = L.marker([21.92266, 61.32568], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone53 = L.marker([26.0173, 68.79639], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone54 = L.marker([16.00358, 75.62988], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone55 = L.marker([-50.42952, 113.13721], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone56 = L.marker([-41.36032, 69.49951], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone57 = L.marker([-37.66643, 72.77344], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone58 = L.marker([10.63901, -107.66602], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone59 = L.marker([15.96133, -93.22998], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+waystone60 = L.marker([0.90084, 157.96143], {
+opacity: 1,
+icon: WaystoneIcon
+}).bindPopup(customPopupws1);
+
+// Waystones Group
+var waystones = L.layerGroup([waystone1, waystone2, waystone3, waystone4, waystone5, waystone6, waystone7, waystone8, waystone9, waystone10, waystone11, waystone12, waystone13, waystone14, waystone15, waystone16, waystone17, waystone18, waystone19, waystone20, waystone21, waystone22, waystone23, waystone24, waystone25, waystone26, waystone27, waystone28, waystone29, waystone30, waystone31, waystone32, waystone33, waystone34, waystone35, waystone36, waystone37, waystone38, waystone39, waystone40, waystone41, waystone42, waystone43, waystone44, waystone45, waystone46, waystone47, waystone48, waystone49, waystone50, waystone51, waystone52, waystone53, waystone54, waystone55, waystone56, waystone57, waystone58, waystone59, waystone60]);
+
+
+
+
+// Declare Map Object
+var map  =  L.map('map', {
+layers: [grid, kingdoms, world]
+}).setView([0, 0], 2);
+
+var baseMaps = {
+"Grid Overlay": grid,
+"Kingdoms Overlay": kingdoms,
+"Concordia World Map": world
+};
+var overlayMaps = {
+"Capital Cities": capitals,
+"Towns & Temples": towns,
+"Landmarks": landmarks,
+"Waystones": waystones
+};
+
+L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+// Map Greeting
+var customPopuptitle1 = "<img src='Maps/Capitals/ConcordiaBanner.png' height='100px', width='300px'/><br>Welcome to Concordia, the fantasy world created by Shirley Jane Hendriks and Juraj Daniel Devcic.<br>Below you can see the world map we created; click on the layers to your top right to swap views on the map, there are 3:<br>- A Grid Overlay to help you calculate distance; each square is 20 by 20 km.<br>- A Kingdom Overlay to help you view the size and shape of the different kingdoms in Concordia (The dark areas are unclaimed land).<br>- Concordia World Map, the clean world map as you can see it now.";
+
+var greeting1 = L.marker ([63.07487, -4.000000], {
+	icon: yStarIcon,
+	title: "Click Me"
+}).bindPopup(customPopuptitle1).addTo(map);
+
+var customPopuptitle2 = "<img src='Maps/Capitals/ConcordiaBanner.png' height='100px', width='300px'/><br>Then there are groups of markers for the world, showing you a variety of markers based on their significance in the world. These markers indicate places in the world, explaining you in short what this place is next to a picture. You can choose to view which groups of markers you want enabled or disabled on any of the previous layermaps.";
+
+var greeting2 = L.marker ([63.07487, 6.00000], {
+	icon: yStarIcon,
+	title: "Click Me"
+}).bindPopup(customPopuptitle2).addTo(map);
+
+var customPopuptitle3 = "<img src='Maps/Capitals/ConcordiaBanner.png' height='100px', width='300px'/><br>The groups of markers are divided into 3 main types:<br>- Capital cities and cities that function as such.<br>- Towns, and Temples.<br>- Landmarks of specific importance.";
+
+var greeting3 = L.marker ([63.07487, 16.00000], {
+	icon: yStarIcon,
+	title: "Click Me"
+}).bindPopup(customPopuptitle3).addTo(map);
+
+
+// Jane's Little Helper
+var marker = L.marker ([0,0], {
+	draggable: true,
+     opacity: 1,
+     icon: rStarIcon
+}).addTo(map);
+marker.bindPopup('<b>Janes Little Helper</b>');
+
+marker.on('dragend', function(e) {
+	// aler(marker.getLatLng().toString()); 
+	marker.getPopup().setContent('Clicked ' + marker.getLatLng().toString()).openOn(map);
+});
+
+
+
+</script>
+</body>
+</html>
